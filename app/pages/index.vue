@@ -58,6 +58,8 @@
             loading-text="Extracting text from image..."
             :editable="true"
             :selectable="true"
+            :max-length="500"
+            :show-wisdom-quote="true"
             show-copy
             @update:text="handleOcrTextUpdate"
           />
@@ -84,7 +86,7 @@
             <Button
               type="button"
               class="w-full min-h-[48px] text-base font-medium"
-              :disabled="!selectedLanguage || !ocrText || isTranslating"
+              :disabled="!selectedLanguage || !ocrText || isTranslating || isTextOverLimit"
               @click="handleTranslate"
             >
               <Icon v-if="!isTranslating" name="lucide:languages" class="w-5 h-5 mr-2" aria-hidden="true" />
@@ -181,7 +183,7 @@ import Button from '@/components/ui/button/Button.vue'
 const { languages } = useLanguages()
 const { ocrText, isLoading: isProcessingOCR, processImage, reset: resetOCR } = useOCR()
 const { translatedText, isLoading: isTranslating, translate, reset: resetTranslation } = useTranslation()
-const { showSuccess } = useToast()
+const { showSuccess, showError } = useToast()
 
 // Component refs and state
 const imageCaptureRef = ref()
@@ -189,12 +191,23 @@ const selectedImage = ref<File | null>(null)
 const selectedLanguage = ref('ar') // Default to Arabic
 const editableOcrText = ref('')
 
+/**
+ * Check if text exceeds character limit (500 characters)
+ */
+const isTextOverLimit = computed(() => {
+  const textToCheck = (editableOcrText.value && editableOcrText.value.trim()) 
+    ? editableOcrText.value.trim() 
+    : (ocrText.value?.trim() || '')
+  return textToCheck.length > 500
+})
+
 
 /**
  * Handle image selection
  */
 const handleImageSelected = (file: File) => {
   selectedImage.value = file
+  editableOcrText.value = '' // Clear editable text when new image is selected
   resetOCR()
   resetTranslation()
   selectedLanguage.value = 'ar' // Reset to Arabic default
@@ -205,6 +218,7 @@ const handleImageSelected = (file: File) => {
  */
 const handleImageCleared = () => {
   selectedImage.value = null
+  editableOcrText.value = '' // Clear editable text when image is cleared
   resetOCR()
   resetTranslation()
   selectedLanguage.value = 'ar' // Reset to Arabic default
@@ -239,13 +253,19 @@ const handleOcrTextUpdate = (text: string) => {
  * Translate OCR text to selected language
  */
 const handleTranslate = async () => {
-  // Prioritize edited text - if user has edited, use that; otherwise use original OCR text
-  // Check editableOcrText first, and only fall back to ocrText if editableOcrText is empty
-  const textToTranslate = (editableOcrText.value && editableOcrText.value.trim()) 
-    ? editableOcrText.value.trim() 
-    : (ocrText.value?.trim() || '')
+  // Always use editableOcrText if it exists (it contains the latest textarea content)
+  // Fall back to ocrText only if editableOcrText is empty
+  // This ensures we always translate the current textarea content
+  const textToTranslate = editableOcrText.value?.trim() || ocrText.value?.trim() || ''
   
   if (!textToTranslate || !selectedLanguage.value) return
+
+  // Check character limit (500 characters)
+  const maxLength = 500
+  if (textToTranslate.length > maxLength) {
+    showError('Text Too Long', `Translation is limited to ${maxLength} characters. Your text has ${textToTranslate.length} characters. Please shorten the text.`)
+    return
+  }
 
   try {
     await translate(textToTranslate, selectedLanguage.value)
@@ -276,10 +296,20 @@ watch(selectedImage, (newImage) => {
   }
 })
 
-// Update editable text when OCR completes (only if user hasn't edited it yet)
-watch(ocrText, (newText) => {
-  if (newText && !editableOcrText.value) {
-    editableOcrText.value = newText
+// Update editable text when OCR completes
+// Always sync editableOcrText with ocrText when OCR completes
+// This ensures we always have the latest OCR result
+watch(ocrText, (newText, oldText) => {
+  // When OCR completes with new text, always update editableOcrText
+  // This ensures the textarea shows the latest OCR result
+  if (newText && newText !== oldText) {
+    // Use nextTick to ensure the TextDisplay component has updated
+    nextTick(() => {
+      editableOcrText.value = newText
+    })
+  } else if (!newText) {
+    // Clear editable text when OCR text is cleared
+    editableOcrText.value = ''
   }
 }, { immediate: true })
 

@@ -36,27 +36,52 @@
       
     <div
       v-if="loading"
-      class="flex items-center justify-center py-12"
+      class="flex flex-col items-center justify-center py-12 space-y-4"
       role="status"
       aria-live="polite"
       :aria-label="loadingText"
     >
-      <Icon name="lucide:loader-2" class="w-6 h-6 text-primary animate-spin mr-3" aria-hidden="true" />
-      <span class="text-sm text-muted-foreground">{{ loadingText }}</span>
+      <div class="flex items-center">
+        <Icon name="lucide:loader-2" class="w-6 h-6 text-primary animate-spin mr-3" aria-hidden="true" />
+        <span class="text-sm text-muted-foreground">{{ loadingText }}</span>
+      </div>
+      <div v-if="showWisdomQuote" class="max-w-md text-center px-4">
+        <p class="text-xs sm:text-sm text-muted-foreground italic">
+          "{{ wisdomQuote }}"
+        </p>
+      </div>
     </div>
 
-    <textarea
-      v-else-if="text && editable"
-      ref="editableTextareaRef"
-      v-model="localText"
-      :dir="textDirection"
-      class="w-full border border-input rounded-lg p-6 resize-y min-h-[120px]"
-      style="user-select: text !important; -webkit-user-select: text !important; -moz-user-select: text !important; -ms-user-select: text !important; pointer-events: auto !important; -webkit-touch-callout: default !important;"
-      placeholder="Edit the extracted text here..."
-      @input="handleTextareaInput"
-      @keydown.ctrl.a.prevent="selectAllText"
-      @keydown.meta.a.prevent="selectAllText"
-    />
+    <div v-else-if="text && editable" class="space-y-2">
+      <textarea
+        ref="editableTextareaRef"
+        v-model="localText"
+        :dir="textDirection"
+        class="w-full border border-input rounded-lg p-6 resize-y min-h-[120px]"
+        :class="{
+          'border-destructive': maxLength && characterCount > maxLength,
+          'border-warning': maxLength && characterCount <= maxLength && remainingChars <= 50
+        }"
+        style="user-select: text !important; -webkit-user-select: text !important; -moz-user-select: text !important; -ms-user-select: text !important; pointer-events: auto !important; -webkit-touch-callout: default !important;"
+        placeholder="Edit the extracted text here..."
+        @input="handleTextareaInput"
+        @keydown.ctrl.a.prevent="selectAllText"
+        @keydown.meta.a.prevent="selectAllText"
+      />
+      
+      <!-- Character counter (only show if maxLength is set) -->
+      <div v-if="maxLength" class="flex justify-end items-center gap-2 text-xs">
+        <span
+          :class="{
+            'text-destructive': characterCount > maxLength,
+            'text-warning': characterCount <= maxLength && remainingChars <= 50,
+            'text-muted-foreground': remainingChars > 50
+          }"
+        >
+          {{ characterCount }} / {{ maxLength }}
+        </span>
+      </div>
+    </div>
     
   
     <div
@@ -82,6 +107,7 @@
 
 <script setup lang="ts">
 import { useToast } from '@/composables/useToast'
+import { useWisdomQuotes } from '@/composables/useWisdomQuotes'
 
 interface Props {
   text?: string
@@ -93,6 +119,8 @@ interface Props {
   editable?: boolean
   selectable?: boolean
   autoDetectDirection?: boolean // Auto-detect RTL for translation text
+  maxLength?: number // Maximum character limit (e.g., 500 for translation)
+  showWisdomQuote?: boolean // Show wisdom quote during loading
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -104,7 +132,9 @@ const props = withDefaults(defineProps<Props>(), {
   showCopy: true,
   editable: false,
   selectable: true,
-  autoDetectDirection: false
+  autoDetectDirection: false,
+  maxLength: undefined,
+  showWisdomQuote: false
 })
 
 const emit = defineEmits<{
@@ -116,6 +146,22 @@ const editableTextareaRef = ref<HTMLTextAreaElement | null>(null)
 const selectableTextareaRef = ref<HTMLTextAreaElement | null>(null)
 
 const { showSuccess, showError } = useToast()
+
+// Wisdom quotes setup (only on client side)
+const { getRandomQuote } = useWisdomQuotes()
+const wisdomQuote = ref('')
+
+// Initialize quote only on client side
+if (import.meta.client) {
+  wisdomQuote.value = getRandomQuote()
+}
+
+// Update quote when loading starts
+watch(() => props.loading, (isLoading) => {
+  if (import.meta.client && isLoading && props.showWisdomQuote) {
+    wisdomQuote.value = getRandomQuote()
+  }
+})
 
 /**
  * Detect if text is RTL (Right-to-Left)
@@ -173,6 +219,18 @@ watch(() => props.text, (newText) => {
     localText.value = newText
   }
 }, { immediate: true })
+
+/**
+ * Character count and remaining characters
+ */
+const characterCount = computed(() => {
+  return localText.value?.length || 0
+})
+
+const remainingChars = computed(() => {
+  if (!props.maxLength) return 0
+  return props.maxLength - characterCount.value
+})
 
 /**
  * Watch localText changes to update direction for editable textareas
