@@ -267,3 +267,10 @@ button:not(:disabled):active {
   background-color: hsl(var(--primary) / 0.3);
   color: hsl(var(--primary-foreground));
 }
+
+/* Image cropper styling - vue-advanced-cropper */
+.cropper {
+  width: 100%;
+  height: 100%;
+}
+
