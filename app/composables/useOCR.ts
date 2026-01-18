@@ -71,10 +71,12 @@ export const useOCR = () => {
         throw new Error(errorMsg)
       }
 
-      ocrText.value = response.data.text.trim()
+      // Remove newlines and extra whitespace, then trim
+      // Replace all newlines with spaces, then collapse multiple spaces into one
+      ocrText.value = response.data.text.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim()
       toast.dismiss(loadingToast)
       return ocrText.value
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.dismiss(loadingToast)
       
       if (err instanceof ApiClientError) {
