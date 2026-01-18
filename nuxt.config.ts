@@ -7,6 +7,7 @@ declare const process: {
     API_BASE_URL?: string
     SITE_URL?: string
     NODE_ENV?: string
+    GOOGLE_ANALYTICS_ID?: string
   }
 }
 
@@ -55,7 +56,8 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       apiBase: process.env?.API_BASE_URL || 'http://localhost:3000',
-      siteUrl: process.env?.SITE_URL || 'https://read-beyond.vercel.app'
+      siteUrl: process.env?.SITE_URL || 'https://read-beyond.vercel.app',
+      googleAnalyticsId: process.env?.GOOGLE_ANALYTICS_ID || ''
     }
   },
 

@@ -463,12 +463,18 @@ ReadBeyond makes translating text from images incredibly simple. Follow these st
    Create a `.env` file in the root directory:
    ```env
    API_BASE_URL=http://localhost:3000
+   GOOGLE_ANALYTICS_ID=G-XXXXXXXXXX
+   SITE_URL=https://read-beyond.vercel.app
    ```
    
-   For production, set your backend API URL:
+   For production, set your backend API URL and Google Analytics ID:
    ```env
    API_BASE_URL=https://api.readbeyond.com
+   GOOGLE_ANALYTICS_ID=G-XXXXXXXXXX
+   SITE_URL=https://read-beyond.vercel.app
    ```
+   
+   **Note**: Google Analytics is only loaded in production. Leave `GOOGLE_ANALYTICS_ID` empty or omit it to disable analytics.
 
 4. **Start development server**
    ```bash
