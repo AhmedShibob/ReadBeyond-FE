@@ -16,7 +16,22 @@
         <Icon name="lucide:copy" class="w-4 h-4 mr-2" aria-hidden="true" />
         Copy
       </Button>
-      </div>
+    </div>
+
+    <!-- Copy button when no title but showCopy is true -->
+    <div v-if="!title && text && showCopy && !loading" class="flex justify-end mb-2">
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        class="min-h-[40px] px-3"
+        aria-label="Copy text to clipboard"
+        @click="copyToClipboard"
+      >
+        <Icon name="lucide:copy" class="w-4 h-4 sm:mr-2" aria-hidden="true" />
+        <span class="hidden sm:inline">Copy</span>
+      </Button>
+    </div>
 
       
     <div
@@ -31,17 +46,23 @@
     </div>
 
     <textarea
-       v-else-if="text && editable"
-        v-model="localText"
-        class="w-full border border-input rounded-lg p-6 resize-y min-h-[120px]"
-        style="user-select: text !important; -webkit-user-select: text !important; -moz-user-select: text !important; -ms-user-select: text !important; pointer-events: auto !important; -webkit-touch-callout: default !important;"
-        placeholder="Edit the extracted text here..."
-      />
+      v-else-if="text && editable"
+      ref="editableTextareaRef"
+      v-model="localText"
+      :dir="textDirection"
+      class="w-full border border-input rounded-lg p-6 resize-y min-h-[120px]"
+      style="user-select: text !important; -webkit-user-select: text !important; -moz-user-select: text !important; -ms-user-select: text !important; pointer-events: auto !important; -webkit-touch-callout: default !important;"
+      placeholder="Edit the extracted text here..."
+      @input="handleTextareaInput"
+      @keydown.ctrl.a.prevent="selectAllText"
+      @keydown.meta.a.prevent="selectAllText"
+    />
     
   
     <div
       v-else-if="text && !editable && !selectable"
-      class="reading-text bg-card border border-border rounded-lg p-6 text-foreground whitespace-pre-wrap break-words select-text"
+      :dir="textDirection"
+      class="reading-text bg-card border border-border rounded-lg p-6 text-foreground whitespace-pre-wrap wrap-break-word select-text"
       role="article"
       :aria-label="title || 'Text content'"
     >
@@ -71,15 +92,19 @@ interface Props {
   showCopy?: boolean
   editable?: boolean
   selectable?: boolean
+  autoDetectDirection?: boolean // Auto-detect RTL for translation text
 }
 
 const props = withDefaults(defineProps<Props>(), {
+  text: '',
+  title: '',
   loading: false,
   loadingText: 'Processing...',
   placeholder: 'No text available',
   showCopy: true,
   editable: false,
-  selectable: true
+  selectable: true,
+  autoDetectDirection: false
 })
 
 const emit = defineEmits<{
@@ -91,6 +116,33 @@ const editableTextareaRef = ref<HTMLTextAreaElement | null>(null)
 const selectableTextareaRef = ref<HTMLTextAreaElement | null>(null)
 
 const { showSuccess, showError } = useToast()
+
+/**
+ * Detect if text is RTL (Right-to-Left)
+ * Checks for Arabic, Hebrew, and other RTL scripts
+ */
+const isRTL = (text: string): boolean => {
+  if (!text || !text.trim()) return false
+  
+  // Arabic Unicode range: \u0600-\u06FF
+  // Hebrew Unicode range: \u0590-\u05FF
+  // Persian/Farsi: \u0600-\u06FF (same as Arabic)
+  // Urdu: \u0600-\u06FF (same as Arabic)
+  const rtlPattern = /[\u0590-\u05FF\u0600-\u06FF\u0700-\u074F\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/
+  
+  // Check if text contains RTL characters
+  return rtlPattern.test(text)
+}
+
+/**
+ * Get text direction based on content
+ */
+const textDirection = computed(() => {
+  if (!props.autoDetectDirection) return 'ltr'
+  
+  const textToCheck = props.editable ? localText.value : props.text
+  return isRTL(textToCheck || '') ? 'rtl' : 'ltr'
+})
 
 /**
  * Select all text in textarea
@@ -123,14 +175,23 @@ watch(() => props.text, (newText) => {
 }, { immediate: true })
 
 /**
+ * Watch localText changes to update direction for editable textareas
+ */
+watch(localText, () => {
+  // Direction will update automatically via computed property
+}, { deep: true })
+
+/**
  * Copy text to clipboard
  */
 const copyToClipboard = async () => {
-  const textToCopy = props.editable ? localText.value : props.text
-  if (!textToCopy) return
+  // For editable textareas, use the current localText value (which includes user edits)
+  // For non-editable, use the props.text
+  const textToCopy = props.editable ? (localText.value || props.text || '') : (props.text || '')
+  if (!textToCopy || !textToCopy.trim()) return
 
   try {
-    await navigator.clipboard.writeText(textToCopy)
+    await navigator.clipboard.writeText(textToCopy.trim())
     showSuccess('Copied to clipboard!')
   } catch {
     showError('Failed to copy', 'Please try selecting and copying the text manually.')

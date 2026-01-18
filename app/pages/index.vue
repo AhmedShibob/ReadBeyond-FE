@@ -101,6 +101,7 @@
               loading-text="Translating text..."
               :editable="true"
               :selectable="true"
+              :auto-detect-direction="true"
               show-copy
             />
           </div>
@@ -238,7 +239,12 @@ const handleOcrTextUpdate = (text: string) => {
  * Translate OCR text to selected language
  */
 const handleTranslate = async () => {
-  const textToTranslate = editableOcrText.value || ocrText.value
+  // Prioritize edited text - if user has edited, use that; otherwise use original OCR text
+  // Check editableOcrText first, and only fall back to ocrText if editableOcrText is empty
+  const textToTranslate = (editableOcrText.value && editableOcrText.value.trim()) 
+    ? editableOcrText.value.trim() 
+    : (ocrText.value?.trim() || '')
+  
   if (!textToTranslate || !selectedLanguage.value) return
 
   try {
@@ -270,9 +276,9 @@ watch(selectedImage, (newImage) => {
   }
 })
 
-// Update editable text when OCR completes
+// Update editable text when OCR completes (only if user hasn't edited it yet)
 watch(ocrText, (newText) => {
-  if (newText) {
+  if (newText && !editableOcrText.value) {
     editableOcrText.value = newText
   }
 }, { immediate: true })
