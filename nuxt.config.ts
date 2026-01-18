@@ -6,12 +6,13 @@ declare const process: {
   env?: {
     API_BASE_URL?: string
     SITE_URL?: string
+    NODE_ENV?: string
   }
 }
 
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
-  devtools: { enabled: true },
+  devtools: { enabled: process.env?.NODE_ENV === 'development' },
   vite: {
     plugins: [
       tailwindcss(),
