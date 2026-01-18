@@ -24,99 +24,6 @@
           />
         </section>
 
-        <!-- Collapsible Help Section - Only shows when no image -->
-        <section v-if="!selectedImage && !ocrText" class="mb-4 sm:mb-6">
-          <details class="bg-card border border-border rounded-xl p-4 sm:p-6 shadow-sm">
-            <summary class="cursor-pointer list-none flex items-center justify-between">
-              <h2 class="text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
-                <Icon name="lucide:help-circle" class="w-5 h-5 text-primary" aria-hidden="true" />
-                <span>How to Use</span>
-              </h2>
-              <Icon name="lucide:chevron-down" class="w-5 h-5 text-muted-foreground transition-transform duration-200" aria-hidden="true" />
-            </summary>
-            <div class="mt-4 space-y-4 pt-4 border-t border-border">
-              <!-- How It Works -->
-              <div>
-                <h3 class="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
-                  <Icon name="lucide:lightbulb" class="w-4 h-4 text-primary" aria-hidden="true" />
-                  How It Works
-                </h3>
-                <div class="space-y-3">
-                  <div class="flex gap-3">
-                    <div class="shrink-0 w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-xs">
-                      1
-                    </div>
-                    <div class="flex-1">
-                      <h4 class="font-semibold text-foreground mb-1 text-sm">Capture</h4>
-                      <p class="text-xs text-muted-foreground">Take a photo or upload an image with text</p>
-                    </div>
-                  </div>
-                  <div class="flex gap-3">
-                    <div class="shrink-0 w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-xs">
-                      2
-                    </div>
-                    <div class="flex-1">
-                      <h4 class="font-semibold text-foreground mb-1 text-sm">Extract</h4>
-                      <p class="text-xs text-muted-foreground">Text is automatically extracted (you can edit it)</p>
-                    </div>
-                  </div>
-                  <div class="flex gap-3">
-                    <div class="shrink-0 w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-xs">
-                      3
-                    </div>
-                    <div class="flex-1">
-                      <h4 class="font-semibold text-foreground mb-1 text-sm">Translate</h4>
-                      <p class="text-xs text-muted-foreground">Select language and get instant translation</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Quick Tips -->
-              <div>
-                <h3 class="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
-                  <Icon name="lucide:sparkles" class="w-4 h-4 text-primary" aria-hidden="true" />
-                  Quick Tips
-                </h3>
-                <ul class="space-y-2 text-xs text-muted-foreground">
-                  <li class="flex items-start gap-2">
-                    <Icon name="lucide:check" class="w-3 h-3 text-primary shrink-0 mt-0.5" aria-hidden="true" />
-                    <span>Use good lighting and hold camera steady</span>
-                  </li>
-                  <li class="flex items-start gap-2">
-                    <Icon name="lucide:check" class="w-3 h-3 text-primary shrink-0 mt-0.5" aria-hidden="true" />
-                    <span>Edit extracted text if OCR made mistakes</span>
-                  </li>
-                  <li class="flex items-start gap-2">
-                    <Icon name="lucide:check" class="w-3 h-3 text-primary shrink-0 mt-0.5" aria-hidden="true" />
-                    <span>Copy translations to save for later</span>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </details>
-        </section>
-      </div>
-
-      <div class="space-y-4 sm:space-y-6">
-        <!-- Image Capture Section -->
-        <section aria-labelledby="capture-heading" class="bg-card border-2 border-primary/20 rounded-xl p-4 sm:p-6 shadow-lg">
-          <div class="flex items-center justify-between mb-4">
-            <h2 id="capture-heading" class="text-lg sm:text-xl font-bold text-foreground flex items-center gap-2">
-              <Icon name="lucide:camera" class="w-5 h-5 sm:w-6 sm:h-6 text-primary" aria-hidden="true" />
-              Capture Image
-            </h2>
-            <span v-if="!selectedImage" class="text-xs text-muted-foreground hidden sm:inline bg-primary/10 px-2 py-1 rounded">Step 1 of 3</span>
-          </div>
-          <ImageCapture
-            ref="imageCaptureRef"
-            @image-selected="handleImageSelected"
-            @image-cleared="handleImageCleared"
-          />
-        </section>
-
-
-
         <!-- OCR Section -->
         <section v-if="selectedImage || ocrText" aria-labelledby="ocr-heading" class="bg-card border border-border rounded-xl p-4 sm:p-6 shadow-sm">
           <div class="flex items-center justify-between mb-4">
@@ -211,6 +118,52 @@
             Start Over
           </Button>
         </div>
+
+        <!-- Quick Start Section - Always last -->
+        <section class="bg-muted/30 border border-border rounded-xl p-4 sm:p-5">
+          <div class="flex items-start gap-3 sm:gap-4">
+            <div class="shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Icon name="lucide:zap" class="w-5 h-5 sm:w-6 sm:h-6 text-primary" aria-hidden="true" />
+            </div>
+            <div class="flex-1 space-y-3">
+              <div>
+                <h3 class="text-sm sm:text-base font-semibold text-foreground mb-2">Quick Start</h3>
+                <div class="flex flex-wrap gap-2 sm:gap-3 text-xs sm:text-sm">
+                  <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-background/50 border border-border/50">
+                    <span class="font-semibold text-primary">1.</span>
+                    <span class="text-muted-foreground">Capture image</span>
+                  </div>
+                  <Icon name="lucide:arrow-right" class="w-4 h-4 text-muted-foreground shrink-0 self-center" aria-hidden="true" />
+                  <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-background/50 border border-border/50">
+                    <span class="font-semibold text-primary">2.</span>
+                    <span class="text-muted-foreground">Text extracted</span>
+                  </div>
+                  <Icon name="lucide:arrow-right" class="w-4 h-4 text-muted-foreground shrink-0 self-center" aria-hidden="true" />
+                  <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-background/50 border border-border/50">
+                    <span class="font-semibold text-primary">3.</span>
+                    <span class="text-muted-foreground">Translate</span>
+                  </div>
+                </div>
+              </div>
+              <div class="flex flex-wrap gap-2 text-xs text-muted-foreground">
+                <div class="flex items-center gap-1.5">
+                  <Icon name="lucide:lightbulb" class="w-3.5 h-3.5 text-primary shrink-0" aria-hidden="true" />
+                  <span>Good lighting works best</span>
+                </div>
+                <span class="text-border">•</span>
+                <div class="flex items-center gap-1.5">
+                  <Icon name="lucide:edit" class="w-3.5 h-3.5 text-primary shrink-0" aria-hidden="true" />
+                  <span>Edit text if needed</span>
+                </div>
+                <span class="text-border">•</span>
+                <div class="flex items-center gap-1.5">
+                  <Icon name="lucide:copy" class="w-3.5 h-3.5 text-primary shrink-0" aria-hidden="true" />
+                  <span>Copy to save</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   </main>
