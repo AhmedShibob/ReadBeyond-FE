@@ -83,24 +83,24 @@
         />
       </div>
 
-      <div class="flex gap-2 sm:gap-3">
+      <div class="flex flex-col sm:flex-row gap-2 sm:gap-3">
         <Button
           type="button"
           variant="outline"
-          class="flex-1 min-h-[48px] text-base font-medium"
+          class="w-full sm:flex-1 min-h-[48px] text-sm sm:text-base font-medium"
           @click="cancelCrop"
         >
-          <Icon name="lucide:x" class="w-5 h-5 mr-2" aria-hidden="true" />
-          Cancel
+          <Icon name="lucide:x" class="w-4 h-4 sm:w-5 sm:h-5 mr-2" aria-hidden="true" />
+          <span class="truncate">Cancel</span>
         </Button>
         <Button
           type="button"
           variant="default"
-          class="flex-1 min-h-[48px] text-base font-medium"
+          class="w-full sm:flex-1 min-h-[48px] text-sm sm:text-base font-medium"
           @click="applyCrop"
         >
-          <Icon name="lucide:check" class="w-5 h-5 mr-2" aria-hidden="true" />
-          Apply Crop
+          <Icon name="lucide:check" class="w-4 h-4 sm:w-5 sm:h-5 mr-2" aria-hidden="true" />
+          <span class="truncate">Apply Crop</span>
         </Button>
       </div>
     </div>
@@ -123,33 +123,33 @@
         </button>
       </div>
 
-      <div class="flex gap-2 sm:gap-3">
+      <div class="flex flex-col sm:flex-row gap-2 sm:gap-3">
         <Button
           type="button"
           variant="outline"
-          class="flex-1 min-h-[48px] text-base font-medium"
+          class="w-full sm:flex-1 min-h-[48px] text-sm sm:text-base font-medium"
           @click="clearImage"
         >
-          <Icon name="lucide:trash-2" class="w-5 h-5 mr-2" aria-hidden="true" />
-          Remove
+          <Icon name="lucide:trash-2" class="w-4 h-4 sm:w-5 sm:h-5 mr-2" aria-hidden="true" />
+          <span class="truncate">Remove</span>
         </Button>
         <Button
           type="button"
           variant="outline"
-          class="flex-1 min-h-[48px] text-base font-medium"
+          class="w-full sm:flex-1 min-h-[48px] text-sm sm:text-base font-medium"
           @click="showCropperAgain"
         >
-          <Icon name="lucide:crop" class="w-5 h-5 mr-2" aria-hidden="true" />
-          Crop Again
+          <Icon name="lucide:crop" class="w-4 h-4 sm:w-5 sm:h-5 mr-2" aria-hidden="true" />
+          <span class="truncate">Crop Again</span>
         </Button>
         <Button
           type="button"
           variant="outline"
-          class="flex-1 min-h-[48px] text-base font-medium"
+          class="w-full sm:flex-1 min-h-[48px] text-sm sm:text-base font-medium"
           @click="triggerFileInput"
         >
-          <Icon name="lucide:refresh-cw" class="w-5 h-5 mr-2" aria-hidden="true" />
-          Change
+          <Icon name="lucide:refresh-cw" class="w-4 h-4 sm:w-5 sm:h-5 mr-2" aria-hidden="true" />
+          <span class="truncate">Change</span>
         </Button>
       </div>
     </div>

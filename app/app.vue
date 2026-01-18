@@ -1,7 +1,10 @@
 <template>
-  <div>
+  <div class="flex flex-col min-h-screen">
     <AppNavbar />
-    <NuxtPage />
+    <main class="flex-1">
+      <NuxtPage />
+    </main>
+    <AppFooter />
     <Toaster position="bottom-right" rich-colors :toast-options="{ duration: 4000 }" theme="dark" />
   </div>
 </template>
